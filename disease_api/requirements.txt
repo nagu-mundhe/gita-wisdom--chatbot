@@ -1,8 +1,8 @@
-flask
+Flask
 flask-cors
 pandas
-numpy
-sentence-transformers
-scikit-learn
 nltk
+numpy
+scikit-learn
+sentence-transformers
 openpyxl

@@ -4,23 +4,34 @@ import pandas as pd
 import string
 import nltk
 import numpy as np
+import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-nltk.download('stopwords')
+# Safely download stopwords
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
 
 app = Flask(__name__)
 CORS(app)
 
+# Load the sentence transformer model
 model_embed = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
+# Function to preprocess text
 def preprocess_text(text):
-    marathi_stopwords = set(["आहे", "कसे", "नाही", "मध्ये", "हे", "त्या", "कधी", "पण", "होते", "मी", "आणि", "त्यामुळे", "का", "काय", "कुठे"])
+    marathi_stopwords = set([
+        "आहे", "कसे", "नाही", "मध्ये", "हे", "त्या", "कधी", "पण", "होते",
+        "मी", "आणि", "त्यामुळे", "का", "काय", "कुठे"
+    ])
     text = text.translate(str.maketrans('', '', string.punctuation))
     tokens = text.split()
     tokens = [word for word in tokens if word not in marathi_stopwords]
     return ' '.join(tokens)
 
+# Load and preprocess dataset
 try:
     df = pd.read_excel("Bhagavad_Gita_Updated_Merged.xlsx")
     df.columns = df.columns.str.strip().str.lower()
@@ -42,6 +53,7 @@ except KeyError as e:
     print(f"❌ Error: {e}")
     raise
 
+# Recommendation API
 @app.route("/recommend", methods=["POST"])
 def recommend():
     data = request.json
@@ -74,9 +86,12 @@ def recommend():
         "Other_Recommendations": other_recs
     })
 
+# Health check route
 @app.route("/", methods=["GET"])
 def home():
     return "🕉️ Bhagavad Gita Shloka Recommender is running."
 
+# Main entry point with Railway-compatible port
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
