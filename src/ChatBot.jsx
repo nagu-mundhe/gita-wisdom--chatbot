@@ -168,7 +168,7 @@ const ChatBot = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/recommend", {
+      const response = await axios.post("https://gita-backend.onrender.com/recommend", {
         problem: userInput,
       });
 
